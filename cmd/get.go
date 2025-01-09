@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -14,13 +15,16 @@ import (
 func fileIsThere(filePath string) bool {
 	// now check the file with os stat
 	file, err := os.Stat(filePath)
-
-	if err != nil {
-		println(err)
+	if err == nil {
+		filepath.Match(filePath, file.Name())
+		if err != nil {
+			return false
+		} else {
+			return true
+		}
+	} else {
 		return false
 	}
-	println(file.Name())
-	return true
 
 }
 
@@ -30,8 +34,12 @@ var getCmd = &cobra.Command{
 	Short: "This commnad is used to get the value",
 	Long:  `This commnad is used to extract the value form the pkv file`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fileName, _ := rootCmd.Flags().GetString("file")
-		fmt.Println(fileIsThere(fileName))
+		fileName, _ := cmd.Flags().GetString("file")
+		if fileIsThere(fileName) {
+			// now read the file
+		} else {
+			fmt.Println("File not found")
+		}
 
 	},
 }
@@ -48,5 +56,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// getCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	getCmd.Flags().StringP("file", "f", ".", "File path of pkv file")
+	getCmd.Flags().StringP("file", "f", "*.pkv", "File path of pkv file")
 }
